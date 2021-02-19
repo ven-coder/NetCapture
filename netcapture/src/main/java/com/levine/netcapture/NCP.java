@@ -14,6 +14,8 @@ public class NCP implements Application.ActivityLifecycleCallbacks {
     public static float coordinateX = 0;
     public static float coordinateY = ScreenUtils.getScreenHeight() / 2 / 2;
     public static boolean isEnableActivityFloatView = true; //是否允许显示浮窗，默认允许
+    private boolean isShowFloatView = true;
+    private Activity currentActivity;
 
     public static NCP getInstance(Application application) {
         if (sNCP == null) {
@@ -37,7 +39,8 @@ public class NCP implements Application.ActivityLifecycleCallbacks {
 
     @Override
     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-        if (activity.getClass().getName().equals(NetCaptureRecordActivity.class.getName()) || !BuildConfig.DEBUG) {
+        currentActivity = activity;
+        if (activity.getClass().getName().equals(NetCaptureRecordActivity.class.getName()) || !isShowFloatView) {
             return;
         }
         ViewGroup decorView = (ViewGroup) activity.getWindow().getDecorView();
@@ -52,10 +55,28 @@ public class NCP implements Application.ActivityLifecycleCallbacks {
 
     }
 
+    public boolean isShowFloatView() {
+        return isShowFloatView;
+    }
+
+    public void setShowFloatView(boolean showFloatView) {
+        isShowFloatView = showFloatView;
+        if (currentActivity == null) return;
+        ViewGroup decorView = (ViewGroup) currentActivity.getWindow().getDecorView();
+        FloatView floatView = new FloatView(currentActivity);
+        floatView.setTag(currentActivity.getClass().getName());
+        floatView.setCoordinate(coordinateX, coordinateY);
+        decorView.addView(floatView);
+    }
+
     @Override
     public void onActivityResumed(Activity activity) {
         ViewGroup decorView = (ViewGroup) activity.getWindow().getDecorView();
         FloatView floatView = decorView.findViewWithTag(activity.getClass().getName());
+        if (!isShowFloatView) {
+            decorView.removeView(floatView);
+            return;
+        }
         if (floatView != null) floatView.setCoordinate(coordinateX, coordinateY);
     }
 
