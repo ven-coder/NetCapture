@@ -61,7 +61,7 @@ public class NCP implements Application.ActivityLifecycleCallbacks {
 
     public void setShowFloatView(boolean showFloatView) {
         isShowFloatView = showFloatView;
-        if (currentActivity == null) return;
+        if (currentActivity == null || !isShowFloatView) return;
         ViewGroup decorView = (ViewGroup) currentActivity.getWindow().getDecorView();
         FloatView floatView = new FloatView(currentActivity);
         floatView.setTag(currentActivity.getClass().getName());
